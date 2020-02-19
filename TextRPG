@@ -1,0 +1,232 @@
+#include <iostream>
+
+using namespace std;
+
+//메인메뉴 목록
+enum Main_Menu {
+	MM_NONE,
+	MM_MAP,
+	MM_STORE,
+	MM_INVENTORY,
+	MM_EXIT
+};
+
+//맵 난이도 설정
+enum MAP_STAGE {
+	MS_NONE,
+	MS_EASY,
+	MS_NORMAL,
+	MS_HARD,
+	MS_BACK
+};
+
+//직업 목록
+enum JOB {
+	J_NONE,
+	J_KNIGHT,
+	J_WIZARD,
+	J_ARCHER,
+	J_END
+};
+
+#define NAME_SIZE 32
+//플레이어 설정
+struct _tagPlayer
+{
+	char strName[NAME_SIZE];
+	char strJob[NAME_SIZE];
+	JOB eJob;
+	int MaxHp;
+	int Hp;
+	int MaxMp;
+	int Mp;
+	int MaxArmor;
+	int MinArmor;
+	int MaxAttack;
+	int MinAttack;
+	int Level;
+	int EXP;
+};
+
+//몬스터 설정
+struct _tagMonster
+{
+	char strName[NAME_SIZE];
+	int MaxHp;
+	int Hp;
+	int MaxMp;
+	int Mp;
+	int MaxArmor;
+	int MinArmor;
+	int MaxAttack;
+	int MinAttack;
+	int Level;
+	int EXP;
+	int MaxGold;
+	int MinGold;
+};
+int main()
+{
+	_tagPlayer tagPlayer {};
+	cout << "----------------------------- 플레이어 설정 -----------------------------" << endl;
+	cout << "이름 : ";
+	cin.getline(tagPlayer.strName, NAME_SIZE - 1);
+
+	int iJob = J_NONE;
+	while (iJob == J_NONE)
+	{
+		cout << "직업 : (1. 기사 \t 2. 마법사 \t 3. 궁수) : ";
+		cin >> iJob;
+
+		if (cin.fail())
+		{
+			cin.clear();
+			cin.ignore(1024, '\n');
+			continue;
+		}
+		else if (iJob <= J_NONE || iJob >= J_END)
+			iJob = J_NONE;
+	}
+	tagPlayer.eJob = (JOB)iJob;
+	switch (tagPlayer.eJob)
+	{
+	case J_KNIGHT:
+		strcpy_s(tagPlayer.strJob, "기사");
+		tagPlayer.MaxAttack = 15;
+		tagPlayer.MinAttack = 10;
+		tagPlayer.MaxArmor = 25;
+		tagPlayer.MinArmor = 15;
+		tagPlayer.MaxHp = 500;
+		tagPlayer.Hp = 500;
+		tagPlayer.MaxMp = 100;
+		tagPlayer.Mp = 100;
+		break;
+	case J_WIZARD:
+		strcpy_s(tagPlayer.strJob, "마법사");
+		tagPlayer.MaxAttack = 20;
+		tagPlayer.MinAttack = 15;
+		tagPlayer.MaxArmor = 15;
+		tagPlayer.MinArmor = 5;
+		tagPlayer.MaxHp = 300;
+		tagPlayer.Hp = 300;
+		tagPlayer.MaxMp = 500;
+		tagPlayer.Mp = 500;
+		break;
+	case J_ARCHER:
+		strcpy_s(tagPlayer.strJob, "궁수");
+		tagPlayer.MaxAttack = 10;
+		tagPlayer.MinAttack = 5;
+		tagPlayer.MaxArmor = 20;
+		tagPlayer.MinArmor = 10;
+		tagPlayer.MaxHp = 300;
+		tagPlayer.Hp = 300;
+		tagPlayer.MaxMp = 200;
+		tagPlayer.Mp = 200;
+		break;
+	}
+	tagPlayer.Level = 1;
+	tagPlayer.EXP = 0;
+
+	//------------------몬스터 생성---------------
+	_tagMonster tagMonsterArr[MS_BACK - 1]{};
+	strcpy_s(tagMonsterArr[0].strName, "고블린");
+	tagMonsterArr[0].MaxAttack = 30;
+	tagMonsterArr[0].MinAttack	= 20;
+	tagMonsterArr[0].MinArmor = 2;
+	tagMonsterArr[0].MaxArmor = 5;
+	tagMonsterArr[0].MaxHp = 100;
+	tagMonsterArr[0].Hp = 100;
+	tagMonsterArr[0].MaxMp = 10;
+	tagMonsterArr[0].Mp = 10;
+	tagMonsterArr[0].Level = 1;
+	tagMonsterArr[0].EXP = 50;
+	tagMonsterArr[0].MaxGold = 1000;
+	tagMonsterArr[0].MinGold = 500;
+
+	strcpy_s(tagMonsterArr[1].strName, "골렘");
+	tagMonsterArr[1].MaxAttack = 100;
+	tagMonsterArr[1].MinAttack = 50;
+	tagMonsterArr[1].MinArmor = 5;
+	tagMonsterArr[1].MaxArmor = 8;
+	tagMonsterArr[1].MaxHp = 200;
+	tagMonsterArr[1].Hp = 200;
+	tagMonsterArr[1].MaxMp = 20;
+	tagMonsterArr[1].Mp = 20;
+	tagMonsterArr[1].Level = 5;
+	tagMonsterArr[1].EXP = 150;
+	tagMonsterArr[1].MaxGold = 3000;
+	tagMonsterArr[1].MinGold = 1500;
+
+	strcpy_s(tagMonsterArr[2].strName, "드래곤");
+	tagMonsterArr[2].MaxAttack = 500;
+	tagMonsterArr[2].MinAttack = 30;
+	tagMonsterArr[2].MinArmor = 20;
+	tagMonsterArr[2].MaxArmor = 50;
+	tagMonsterArr[2].MaxHp = 1100;
+	tagMonsterArr[2].Hp = 1000;
+	tagMonsterArr[2].MaxMp = 100;
+	tagMonsterArr[2].Mp = 100;
+	tagMonsterArr[2].Level = 15;
+	tagMonsterArr[2].EXP = 500;
+	tagMonsterArr[2].MaxGold = 7000;
+	tagMonsterArr[2].MinGold = 5500;
+
+	while (true)
+	{
+		system("cls");
+		cout << "----------------------------- 메인 로비 -----------------------------" << endl;
+		cout << "1. 맵" << "\n" << "2. 상점" << "\n" << "3. 가방" << "\n" << "4. 종료" << endl;
+		cout << "메뉴를 선택하십시오 : ";
+		int iMenu;
+		cin >> iMenu;
+
+		if (cin.fail())
+		{
+			cin.clear();
+			cin.ignore(1024, '\n');
+			continue;
+		}
+		else if (iMenu == MM_EXIT)
+			break;
+
+		switch (iMenu)
+		{
+		case MM_MAP:
+			system("cls");
+			cout << "----------------------------- 맵 -----------------------------" << endl;
+			cout << "1. 쉬움" << "\n" << "2. 보통" << "\n" << "3. 어려움" << "\n" << "4. 뒤로 가기" << "\n";
+			cout << "난이도를 설정 하십시오 : ";
+			cin >> iMenu;
+			if (cin.fail())
+			{
+				cin.clear();
+				cin.ignore(1024, '\n');
+				continue;
+			}
+			else if (iMenu == MS_BACK)
+				break;
+			switch (iMenu)
+			{
+			case MS_EASY:
+				cout << "----------------------------- 쉬움 -----------------------------" << endl;
+				break;
+			case MS_NORMAL:
+				cout << "----------------------------- 보통 -----------------------------" << endl;
+				break;
+			case MS_HARD:
+				cout << "----------------------------- 어려움 -----------------------------" << endl;
+				break;
+			default:
+				break;
+			}
+			break;
+		case MM_STORE:
+			break;
+		case MM_INVENTORY:
+			break;
+		default:
+			break;
+		}
+	}
+
+}

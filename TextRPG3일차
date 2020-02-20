@@ -1,0 +1,612 @@
+#include <iostream>
+#include <time.h>
+#include <Windows.h>
+
+using namespace std;
+
+//메인메뉴 목록
+enum Main_Menu {
+	MM_NONE,
+	MM_MAP,
+	MM_STORE,
+	MM_INVENTORY,
+	MM_EXIT
+};
+
+//맵 난이도 설정
+enum MAP_STAGE {
+	MS_NONE,
+	MS_EASY,
+	MS_NORMAL,
+	MS_HARD,
+	MS_BACK
+};
+
+//직업 목록
+enum JOB {
+	J_NONE,
+	J_KNIGHT,
+	J_WIZARD,
+	J_ARCHER,
+	J_END
+};
+
+//아이템 구현
+enum ITEM_TYPE {
+	IT_NONE,
+	IT_WEAPON,
+	IT_ARMOR,
+	IT_BACK
+};
+
+enum STORE_MENU {
+	SM_NONE,
+	SM_WEAPON,
+	SM_ARMOR,
+	SM_BACK
+};
+
+enum WEA_AR {
+	WA_NONE,
+	WA_WEAPON1,
+	WA_WEAPON2,
+	WA_WEAPON3,
+	WA_ARMOR1,
+	WA_ARMOR2,
+	WA_ARMOR3,
+};
+#define NAME_SIZE 32
+#define ITEM_DESC_LENGTH 512
+#define INVENTORY_MAX 20
+#define STORE_WEAPON_MAX 3
+#define STORE_ARMOR_MAX 3
+
+struct _tagItem
+{
+	char strName[NAME_SIZE];
+	char strTypeName[NAME_SIZE];
+	ITEM_TYPE eType;
+	int Min;
+	int Max;
+	int Price;
+	int Sell;
+	char strDESC[ITEM_DESC_LENGTH];
+};
+
+struct _tagInventory {
+	_tagItem Item[INVENTORY_MAX];
+	int Itemcnt;
+	int Gold;
+};
+//플레이어 설정
+struct _tagPlayer
+{
+	char strName[NAME_SIZE];
+	char strJob[NAME_SIZE];
+	JOB eJob;
+	int MaxHp;
+	int Hp;
+	int MaxMp;
+	int Mp;
+	int MaxArmor;
+	int MinArmor;
+	int MaxAttack;
+	int MinAttack;
+	int Level;
+	int EXP;
+	_tagInventory tagInventory;
+};
+
+//몬스터 설정
+struct _tagMonster
+{
+	char strName[NAME_SIZE];
+	int MaxHp;
+	int Hp;
+	int MaxMp;
+	int Mp;
+	int MaxArmor;
+	int MinArmor;
+	int MaxAttack;
+	int MinAttack;
+	int Level;
+	int EXP;
+	int MaxGold;
+	int MinGold;
+};
+
+int main()
+{
+	srand((unsigned int)time(0));
+
+	_tagPlayer tagPlayer {};
+	cout << "----------------------------- 플레이어 설정 -----------------------------" << endl;
+	cout << "이름 : ";
+	cin.getline(tagPlayer.strName, NAME_SIZE - 1);
+
+	int iJob = J_NONE;
+	while (iJob == J_NONE)
+	{
+		cout << "직업 : (1. 기사 \t 2. 마법사 \t 3. 궁수) : ";
+		cin >> iJob;
+
+		if (cin.fail())
+		{
+			cin.clear();
+			cin.ignore(1024, '\n');
+			continue;
+		}
+		else if (iJob <= J_NONE || iJob >= J_END)
+			iJob = J_NONE;
+	}
+	//직업 개인 설정
+	tagPlayer.eJob = (JOB)iJob;
+	switch (tagPlayer.eJob)
+	{
+	case J_KNIGHT:
+		strcpy_s(tagPlayer.strJob, "기사");
+		tagPlayer.MaxAttack = 15;
+		tagPlayer.MinAttack = 10;
+		tagPlayer.MaxArmor = 25;
+		tagPlayer.MinArmor = 15;
+		tagPlayer.MaxHp = 500;
+		tagPlayer.Hp = 500;
+		tagPlayer.MaxMp = 100;
+		tagPlayer.Mp = 100;
+		break;
+	case J_WIZARD:
+		strcpy_s(tagPlayer.strJob, "마법사");
+		tagPlayer.MaxAttack = 20;
+		tagPlayer.MinAttack = 15;
+		tagPlayer.MaxArmor = 15;
+		tagPlayer.MinArmor = 5;
+		tagPlayer.MaxHp = 300;
+		tagPlayer.Hp = 300;
+		tagPlayer.MaxMp = 500;
+		tagPlayer.Mp = 500;
+		break;
+	case J_ARCHER:
+		strcpy_s(tagPlayer.strJob, "궁수");
+		tagPlayer.MaxAttack = 10;
+		tagPlayer.MinAttack = 5;
+		tagPlayer.MaxArmor = 20;
+		tagPlayer.MinArmor = 10;
+		tagPlayer.MaxHp = 300;
+		tagPlayer.Hp = 300;
+		tagPlayer.MaxMp = 200;
+		tagPlayer.Mp = 200;
+		break;
+	}
+	tagPlayer.Level = 1;
+	tagPlayer.EXP = 0;
+	tagPlayer.tagInventory.Gold = 1000000;
+
+	//몬스터 생성
+	_tagMonster tagMonsterArr[MS_BACK - 1]{};
+	{
+		//------------------몬스터 생성---------------
+		
+		strcpy_s(tagMonsterArr[0].strName, "고블린");
+		tagMonsterArr[0].MaxAttack = 30;
+		tagMonsterArr[0].MinAttack = 20;
+		tagMonsterArr[0].MinArmor = 2;
+		tagMonsterArr[0].MaxArmor = 5;
+		tagMonsterArr[0].MaxHp = 100;
+		tagMonsterArr[0].Hp = 100;
+		tagMonsterArr[0].MaxMp = 10;
+		tagMonsterArr[0].Mp = 10;
+		tagMonsterArr[0].Level = 1;
+		tagMonsterArr[0].EXP = 50;
+		tagMonsterArr[0].MaxGold = 1000;
+		tagMonsterArr[0].MinGold = 500;
+
+		strcpy_s(tagMonsterArr[1].strName, "골렘");
+		tagMonsterArr[1].MaxAttack = 100;
+		tagMonsterArr[1].MinAttack = 50;
+		tagMonsterArr[1].MinArmor = 5;
+		tagMonsterArr[1].MaxArmor = 8;
+		tagMonsterArr[1].MaxHp = 200;
+		tagMonsterArr[1].Hp = 200;
+		tagMonsterArr[1].MaxMp = 20;
+		tagMonsterArr[1].Mp = 20;
+		tagMonsterArr[1].Level = 5;
+		tagMonsterArr[1].EXP = 150;
+		tagMonsterArr[1].MaxGold = 3000;
+		tagMonsterArr[1].MinGold = 1500;
+
+		strcpy_s(tagMonsterArr[2].strName, "드래곤");
+		tagMonsterArr[2].MaxAttack = 500;
+		tagMonsterArr[2].MinAttack = 30;
+		tagMonsterArr[2].MinArmor = 20;
+		tagMonsterArr[2].MaxArmor = 50;
+		tagMonsterArr[2].MaxHp = 1100;
+		tagMonsterArr[2].Hp = 1000;
+		tagMonsterArr[2].MaxMp = 100;
+		tagMonsterArr[2].Mp = 100;
+		tagMonsterArr[2].Level = 15;
+		tagMonsterArr[2].EXP = 500;
+		tagMonsterArr[2].MaxGold = 7000;
+		tagMonsterArr[2].MinGold = 5500;
+	}
+
+	//상점에서 판매할 목록 생성
+	_tagItem StoreWeapon[STORE_WEAPON_MAX]{};
+	_tagItem StoreArmor[STORE_ARMOR_MAX]{};
+	{
+		strcpy_s(StoreWeapon[0].strName, "강철 검");
+		strcpy_s(StoreWeapon[0].strTypeName, "대검");
+		strcpy_s(StoreWeapon[0].strDESC, "적당한 대검이다.");
+		StoreWeapon[0].Price = 20000;
+		StoreWeapon[0].Max = 300;
+		StoreWeapon[0].Min = 250;
+
+		strcpy_s(StoreWeapon[1].strName, "국궁");
+		strcpy_s(StoreWeapon[1].strTypeName, "활");
+		strcpy_s(StoreWeapon[1].strDESC, "적당한 활이다.");
+		StoreWeapon[1].Price = 18000;
+		StoreWeapon[1].Max = 250;
+		StoreWeapon[1].Min = 240;
+
+		strcpy_s(StoreWeapon[2].strName, "마력 스태프");
+		strcpy_s(StoreWeapon[2].strTypeName, "스태프");
+		strcpy_s(StoreWeapon[2].strDESC, "적당한 스태프이다.");
+		StoreWeapon[2].Price = 23000;
+		StoreWeapon[2].Max = 400;
+		StoreWeapon[2].Min = 350;
+
+		strcpy_s(StoreArmor[0].strName, "강철 갑옷");
+		strcpy_s(StoreArmor[0].strTypeName, "갑옷");
+		strcpy_s(StoreArmor[0].strDESC, "적당한 갑옷이다.");
+		StoreArmor[0].Price = 30000;
+		StoreArmor[0].Max = 100;
+		StoreArmor[0].Min = 80;
+		
+		strcpy_s(StoreArmor[1].strName, "황금 갑옷");
+		strcpy_s(StoreArmor[1].strTypeName, "갑옷");
+		strcpy_s(StoreArmor[1].strDESC, "단단한 갑옷이다.");
+		StoreArmor[1].Price = 80000;
+		StoreArmor[1].Max = 300;
+		StoreArmor[1].Min = 250;
+		
+		strcpy_s(StoreArmor[2].strName, "다이아 갑옷");
+		strcpy_s(StoreArmor[2].strTypeName, "갑옷");
+		strcpy_s(StoreArmor[2].strDESC, "부셔지지 않는 갑옷이다.");
+		StoreArmor[2].Price = 200000;
+		StoreArmor[2].Max = 500;
+		StoreArmor[2].Min = 450;
+
+	}
+	while (true)
+	{
+		system("cls");
+		cout << "----------------------------- 메인 로비 -----------------------------" << endl;
+		cout << "1. 사냥" << "\n" << "2. 상점" << "\n" << "3. 가방" << "\n" << "4. 종료" << endl;
+		cout << "메뉴를 선택하십시오 : ";
+		int iMenu;
+		cin >> iMenu;
+
+		if (cin.fail())
+		{
+			cin.clear();
+			cin.ignore(1024, '\n');
+			continue;
+		}
+		else if (iMenu == MM_EXIT)
+			break;
+
+		switch (iMenu)
+		{
+		case MM_MAP:
+		{
+			system("cls");
+			cout << "----------------------------- 사냥 -----------------------------" << endl;
+			cout << "1. 쉬움" << "\n" << "2. 보통" << "\n" << "3. 어려움" << "\n" << "4. 뒤로 가기" << "\n";
+			cout << "난이도를 설정 하십시오 : ";
+			cin >> iMenu;
+			if (cin.fail())
+			{
+				cin.clear();
+				cin.ignore(1024, '\n');
+				continue;
+			}
+			else if (iMenu == MS_BACK)
+				break;
+			system("cls");
+			switch (iMenu)
+			{
+			case MS_EASY:
+				cout << "----------------------------- 쉬움 -----------------------------" << endl;
+				break;
+			case MS_NORMAL:
+				cout << "----------------------------- 보통 -----------------------------" << endl;
+				break;
+			case MS_HARD:
+				cout << "----------------------------- 어려움 -----------------------------" << endl;
+				break;
+			}
+			//플레이어, 몬스터 정보 출력
+			while (1)
+			{
+				cout << "\n";
+				cout << "----------------------------- 플레이어 -----------------------------" << endl;
+				cout << "이름 : " << tagPlayer.strName << "\t직업 : " << tagPlayer.strJob << endl;
+				cout << "레벨 : " << tagPlayer.Level << "\t경험치 : " << tagPlayer.EXP << endl;
+				cout << "체력 : " << tagPlayer.Hp << "/" << tagPlayer.MaxHp << "\t마나 : " << tagPlayer.Mp << "/" << tagPlayer.MaxMp << endl;
+				cout << "공격력 : " << tagPlayer.MinAttack << "~" << tagPlayer.MaxAttack << "\t방어력 : " << tagPlayer.MinArmor << "~" << tagPlayer.MaxArmor << endl;
+				cout << "보유 골드 : " << tagPlayer.tagInventory.Gold << " Gold" << endl;
+
+				//몬스터 정보
+				cout << "\n";
+				cout << "----------------------------- 몬스터 -----------------------------" << endl;
+				cout << "이름 : " << tagMonsterArr[iMenu - 1].strName << endl;
+				cout << "레벨 : " << tagMonsterArr[iMenu - 1].Level << "\t경험치 : " << tagMonsterArr[iMenu - 1].EXP << endl;
+				cout << "체력 : " << tagMonsterArr[iMenu - 1].Hp << "/" << tagMonsterArr[iMenu - 1].MaxHp << "\t마나 : " << tagMonsterArr[iMenu - 1].Mp << "/" << tagMonsterArr[iMenu - 1].MaxMp << endl;
+				cout << "공격력 : " << tagMonsterArr[iMenu - 1].MinAttack << "~" << tagMonsterArr[iMenu - 1].MaxAttack << "\t방어력" << tagMonsterArr[iMenu - 1].MinArmor << "~" << tagMonsterArr[iMenu - 1].MaxArmor << endl;
+				cout << "보유 골드 : " << tagMonsterArr[iMenu - 1].MinGold << "~" << tagMonsterArr[iMenu - 1].MaxGold << " Gold" << endl;
+
+				int iiMenu;
+				cout << "\n1. 전투 2. 도망 가기 : ";
+				cin >> iiMenu;
+				if (iiMenu == 1)
+				{
+					int G_Gold = (rand() % (tagMonsterArr[iMenu - 1].MaxGold - tagMonsterArr[iMenu - 1].MinGold + 1)) + tagMonsterArr[iMenu - 1].MinGold;
+					int P_Attack = (rand() % (tagPlayer.MaxAttack - tagPlayer.MinAttack + 1)) + tagPlayer.MinAttack;
+					int M_Armor = (rand() % (tagMonsterArr[iMenu - 1].MaxArmor - tagMonsterArr[iMenu - 1].MinArmor + 1)) + (tagMonsterArr[iMenu - 1].MinArmor);
+
+					int Damage = P_Attack - M_Armor;
+					Damage = Damage < 1 ? 1 : Damage;
+					tagMonsterArr[iMenu - 1].Hp -= Damage;
+					cout << tagPlayer.strName << "이(가) " << tagMonsterArr[iMenu - 1].strName << "을(를)" << Damage << "피해를 입혔습니다." << endl;
+					if (tagMonsterArr[iMenu - 1].Hp < 1)
+					{
+						cout << "몬스터가 죽었습니다. 획득 경험치 : " << tagMonsterArr[iMenu - 1].EXP << "\t 획득 골드 : " << G_Gold << endl;
+						tagMonsterArr[iMenu - 1].Hp = tagMonsterArr[iMenu - 1].MaxHp;
+						tagMonsterArr[iMenu - 1].Mp = tagMonsterArr[iMenu - 1].MaxMp;
+						tagPlayer.EXP += tagMonsterArr[iMenu - 1].EXP;
+						tagPlayer.tagInventory.Gold += G_Gold;
+					}
+
+					int M_Attack = (rand() % (tagMonsterArr[iMenu - 1].MaxAttack - tagMonsterArr[iMenu - 1].MinAttack + 1)) + (tagMonsterArr[iMenu - 1].MinAttack);
+					int P_Armor = (rand() % (tagPlayer.MaxArmor - tagPlayer.MinArmor + 1)) + (tagPlayer.MinArmor);
+
+					int P_Damage = M_Attack - P_Armor;
+					P_Damage = P_Damage < 1 ? 1 : P_Damage;
+					tagPlayer.Hp -= P_Damage;
+					cout << tagMonsterArr[iMenu - 1].strName << "이(가) " << tagPlayer.strName << "을(를)" << P_Damage << "피해를 입혔습니다." << endl;
+					Sleep(1000);
+					system("cls");
+					if (tagPlayer.Hp < 1)
+					{
+						float L_EXP = tagPlayer.EXP * 0.2f;
+						float L_Gold = tagPlayer.tagInventory.Gold * 0.2f;
+
+						tagPlayer.EXP -= L_EXP;
+						if (tagPlayer.EXP < 1) tagPlayer.EXP = 0;
+						tagPlayer.tagInventory.Gold -= L_Gold;
+						if (tagPlayer.tagInventory.Gold < 1) tagPlayer.tagInventory.Gold = 0;
+						cout << tagPlayer.strName << "이(가) 죽었습니다. 잃어버린 경험치 : " << L_EXP << "\t 잃어버린 골드 : " << L_Gold << endl;
+					}
+				}
+				else
+					break;
+			}
+			break;
+		}
+		case MM_STORE:
+			WEA_AR num[INVENTORY_MAX];
+			while (true)
+			{
+				system("cls");
+				cout << "----------------------------- 상점 -----------------------------" << endl;
+				cout << "1. 무기 상점" << "\n" << "2. 방어구 상점" << "\n" << "3. 뒤로 가기" << endl;
+				cout << "상점을 선택 하십시오 : ";
+				cin >> iMenu;
+				if (cin.fail())
+				{
+					cin.clear();
+					cin.ignore(1024, '\n');
+					continue;
+				}
+				else if (iMenu == SM_BACK)
+					break;
+				switch (iMenu)
+				{
+				case SM_WEAPON:
+					while (true)
+					{
+						system("cls");
+						cout << "----------------------------- 무기 상점 -----------------------------" << endl;
+						for (int i = 0; i < STORE_WEAPON_MAX; i++)
+						{
+							cout << i + 1 << "번 아이템 : " << StoreWeapon[i].strName << "\t 종류 : " << StoreWeapon[i].strTypeName
+								<< "\n판매가격 : " << StoreWeapon[i].Price << "\t 공격력 : " << StoreWeapon[i].Min << "~" << StoreWeapon[i].Max
+								<< "\n설명 : " << StoreWeapon[i].strDESC << endl << endl;
+						}	
+						cout << STORE_WEAPON_MAX + 1 << "번 뒤로가기" << endl;
+						cout << "구매할 아이템 번호를 입력하세요 : ";
+						cin >> iMenu;
+						if (cin.fail())
+						{
+							cin.clear();
+							cin.ignore(1024, '\n');
+							continue;
+						}
+						else if (iMenu == (STORE_WEAPON_MAX + 1))
+							break;
+						else if (tagPlayer.tagInventory.Itemcnt == INVENTORY_MAX)
+							cout << "인벤토리가 가득 찼습니다.";
+						switch (iMenu)
+						{
+						case 1:
+							if (tagPlayer.tagInventory.Gold < StoreWeapon[0].Price)
+							{
+								cout << "골드가 부족합니다.\n";
+								system("pause");
+							}
+							else
+							{
+								cout << "아이템을 구입하였습니다." << endl;
+								tagPlayer.tagInventory.Gold -= StoreWeapon[0].Price;
+								tagPlayer.tagInventory.Item[tagPlayer.tagInventory.Itemcnt] = StoreWeapon[0];
+								tagPlayer.tagInventory.Itemcnt++;
+								num[0] = WA_WEAPON1;
+								cout << "남은 골드는" << tagPlayer.tagInventory.Gold << "입니다\n";
+								system("pause");
+							}
+							break;
+						case 2:
+							if (tagPlayer.tagInventory.Gold < StoreWeapon[1].Price)
+							{
+								cout << "골드가 부족합니다.\n";
+								system("pause");
+							}
+							else
+							{
+								cout << "아이템을 구입하였습니다." << endl;
+								tagPlayer.tagInventory.Gold -= StoreWeapon[1].Price;
+								tagPlayer.tagInventory.Item[tagPlayer.tagInventory.Itemcnt] = StoreWeapon[1];
+								tagPlayer.tagInventory.Itemcnt++;
+								num[1] = WA_WEAPON2;
+								cout << "남은 골드는" << tagPlayer.tagInventory.Gold << "입니다\n";
+								system("pause");
+							}
+							break;
+						case 3:
+							if (tagPlayer.tagInventory.Gold < StoreWeapon[2].Price)
+							{
+								cout << "골드가 부족합니다.\n";
+								system("pause");
+							}
+							else
+							{
+								cout << "아이템을 구입하였습니다." << endl;
+								tagPlayer.tagInventory.Gold -= StoreWeapon[2].Price;
+								tagPlayer.tagInventory.Item[tagPlayer.tagInventory.Itemcnt] = StoreWeapon[2];
+								tagPlayer.tagInventory.Itemcnt++;
+								num[2] = WA_WEAPON3;
+								cout << "남은 골드는" << tagPlayer.tagInventory.Gold << "입니다\n";
+								system("pause");
+							}
+							break;
+						default:
+							break;
+						}
+					}
+					break;
+				case SM_ARMOR:
+					while (true)
+					{
+						system("cls");
+						cout << "----------------------------- 방어구 상점 -----------------------------" << endl;
+						for (int i = 0; i < STORE_ARMOR_MAX; i++)
+						{
+							cout << i + 1 << "번 아이템 : " << StoreArmor[i].strName << "\t 종류 : " << StoreArmor[i].strTypeName
+								<< "\n판매가격 : " << StoreArmor[i].Price << "\t 공격력 : " << StoreArmor[i].Min << "~" << StoreArmor[i].Max
+								<< "\n설명 : " << StoreArmor[i].strDESC << endl << endl;
+						}
+						cout << STORE_ARMOR_MAX + 1 << "번 뒤로가기" << endl;
+						cout << "구매할 아이템 번호를 입력하세요 : ";
+						cin >> iMenu;
+						if (cin.fail())
+						{
+							cin.clear();
+							cin.ignore(1024, '\n');
+							continue;
+						}
+						else if (iMenu == (STORE_ARMOR_MAX + 1))
+							break;
+						else if (tagPlayer.tagInventory.Itemcnt == INVENTORY_MAX)
+							cout << "인벤토리가 가득 찼습니다.";
+						switch (iMenu)
+						{
+						case 1:
+							if (tagPlayer.tagInventory.Gold < StoreArmor[0].Price)
+							{
+								cout << "골드가 부족합니다.\n";
+								system("pause");
+							}
+							else
+							{
+								cout << "아이템을 구입하였습니다." << endl;
+								tagPlayer.tagInventory.Gold -= StoreArmor[0].Price;
+								tagPlayer.tagInventory.Item[tagPlayer.tagInventory.Itemcnt] = StoreArmor[0];
+								tagPlayer.tagInventory.Itemcnt++;
+								num[3] = WA_ARMOR1;
+								cout << "남은 골드는" << tagPlayer.tagInventory.Gold << "입니다\n";
+								system("pause");
+							}
+							break;
+						case 2:
+							if (tagPlayer.tagInventory.Gold < StoreArmor[1].Price)
+							{
+								cout << "골드가 부족합니다.\n";
+								system("pause");
+							}
+							else
+							{
+								cout << "아이템을 구입하였습니다." << endl;
+								tagPlayer.tagInventory.Gold -= StoreArmor[1].Price;
+								tagPlayer.tagInventory.Item[tagPlayer.tagInventory.Itemcnt] = StoreArmor[1];
+								tagPlayer.tagInventory.Itemcnt++;
+								num[4] = WA_ARMOR2;
+								cout << "남은 골드는" << tagPlayer.tagInventory.Gold << "입니다\n";
+								system("pause");
+							}
+							break;
+						case 3:
+							if (tagPlayer.tagInventory.Gold < StoreArmor[2].Price)
+							{
+								cout << "골드가 부족합니다.\n";
+								system("pause");
+							}
+							else
+							{
+								cout << "아이템을 구입하였습니다." << endl;
+								tagPlayer.tagInventory.Gold -= StoreArmor[2].Price;
+								tagPlayer.tagInventory.Item[tagPlayer.tagInventory.Itemcnt] = StoreArmor[2];
+								tagPlayer.tagInventory.Itemcnt++;
+								num[5] = WA_ARMOR3;
+								cout << "남은 골드는" << tagPlayer.tagInventory.Gold << "입니다\n";
+								system("pause");
+							}
+							break;
+						default:
+							break;
+						}
+					}
+					break;
+				default:
+					break;
+				}
+			}
+			break;
+		case MM_INVENTORY:
+			system("cls");
+			for (int i = 0; i < tagPlayer.tagInventory.Itemcnt; i++)
+			{					
+				if (num[i] == WA_ARMOR1 || num[i] == WA_ARMOR2 || num[i] == WA_ARMOR3)
+				{
+					cout << i + 1 << "번째 아이템 : " << tagPlayer.tagInventory.Item[i].strName << "\t 방어력 : " << tagPlayer.tagInventory.Item[i].Min << "~"
+						<< tagPlayer.tagInventory.Item[i].Max << "\n 종류 : " << tagPlayer.tagInventory.Item[i].strTypeName
+						<< "\n 설명 : " << tagPlayer.tagInventory.Item[i].strDESC << endl;
+					system("pause");
+				}
+
+				else
+				{
+					cout << i + 1 << "번째 아이템 : " << tagPlayer.tagInventory.Item[i].strName << "\t 공격력 : " << tagPlayer.tagInventory.Item[i].Min << "~"
+						<< tagPlayer.tagInventory.Item[i].Max << "\n 종류 : " << tagPlayer.tagInventory.Item[i].strTypeName
+						<< "\n 설명 : " << tagPlayer.tagInventory.Item[i].strDESC << endl;
+					system("pause");
+				}
+			}
+			break;
+		default:
+			break;
+		}
+	}
+
+}
+
+----------------------------------------------------------------------------------------------------
+상점아이템 구현 및 인벤토리에 저장 코드 추가

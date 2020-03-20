@@ -1,0 +1,65 @@
+포인터가 가리키는 값을 가져오려면 * 사용
+
+numptr = &num;
+cout<< *numptr;  //포인터는 변수의 주소만 기리키며 역참조는 주소에 접근해 값 가져옴
+
+포인터를 선언할 때의 *은 '이 변수가 포인터다'라고 알려주는 것이고
+포인터에 *을 사용할 땐 '포인터의 메모리 주소를 역참조' 한다는 것이다.
+*numptr = 20; //역참조 연산자로 메모리 주소에 접근해 20저장
+
+상수인 const도 사용가능 하다.
+const int *numptr / int const *numptr 둘다 int형 상수를 가리키는 포인터이다.
+
+int *const numptr = &num; //int형 포인터 상수 (위와 헷갈리지 않기)
+
+int num1=10;
+int num2=20;
+int *const numptr = &num1;
+
+numptr=&num2; //컴파일 에러(포인터 상수인데 변경하려고 해서)
+
+const int *const numptr; //위의 2개를 합친것(int형 상수를 가리키는 포인터 상수) 주소,값 둘다 변경 불가하다.
+
+
+void *ptr
+void형 포인터(자료형이 정해지지 않은 포인터) (어떤 자료형이든 저장이 가능하다)
+어떤 자료형이 정해지지 않았기 때문에 역참조는 불가하다.
+
+
+**numptr 
+이중포인터
+
+int *numptr;
+int **numptr2;
+int num=10;
+
+numptr = &num;
+numptr2 = &numptr;
+cout<<**numptr2; //10출력
+//numptr2에 numptr 포인터의 메모리 주소 저장
+
+
+numArr[5] = {11,22,33,44,55};
+int *numptrA;
+int *numptrB;
+int *numptrC;
+
+numptrA = numArr;
+numptrB = numptrA + 1; //22출력(numptrA + 1은 numArr[1] 과 같다 = *(numptrA + 1))
+numptrC = numptrA + 2; //33출력
+
+
+구조체 포인터
+구조체에 접근 할때는 *와 . 연산자 우선순위가 같기때문에
+(*ptr).num = 50; 괄호로 포인터를 묶어준다음 접근하거나 ptr->num = 50; 으로 접근해야 한다.
+
+  
+ 전위++과 *는 연산자 우선순위가 같기 때문에 오른쪽에서 왼쪽으로 결합
+
+	cout << "*pt+1 : " << *pt + 1 << endl;                                //결과 : 101 (포인터pt가 가리키는 곳의 데이터에 1증가)
+	cout << "*(pt+1) : " << *(pt + 1) << endl;                            //결과 : 쓰레기값 (포인터pt가 가리키고 있는 주소 + 주소에 저장된 데이터)
+	cout << "*pt++ : " << *pt++ << endl;                                  //결과 : 100 (포인터pt가 가리키는 곳의 데이터를 사용한 후 포인터pt에 저장된 주소값을 1증가)
+	cout << "*++pt : " << *++pt << endl;                                  //결과 : 쓰레기값 (포인터pt가 가리키는 곳의 주소값을 1증가 시킨후 증가된 주소의 값을 사용)
+  cout << "(*pt)++ : " << (*pt)++ << endl;                              //결과 : 100 (포인터pt가 가리키는 곳의 데이터를 사용한 후 그 값을 1 증가)
+  cout << "++*pt : " << ++*pt << endl;                                  //결과 : 101 (포인터pt가 가리키는 곳의 데이터에 1을 증가)
+  
